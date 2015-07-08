@@ -1,0 +1,10 @@
+[package]
+name = "household-power"
+version = "0.0.1"
+authors = ["Michael Sproul <micsproul@gmail.com>"]
+
+[dependencies]
+
+xml-rs = "*"
+serial = "*"
+time = "*"
