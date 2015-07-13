@@ -1,7 +1,8 @@
 [root]
-name = "xml-parse"
-version = "0.1.0"
+name = "household-power"
+version = "0.0.1"
 dependencies = [
+ "log 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.30 (registry+https://github.com/rust-lang/crates.io-index)",
  "xml-rs 0.1.25 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -33,6 +34,14 @@ dependencies = [
 name = "libc"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "log"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "serial"

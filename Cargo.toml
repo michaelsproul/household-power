@@ -8,3 +8,4 @@ authors = ["Michael Sproul <micsproul@gmail.com>"]
 xml-rs = "*"
 serial = "*"
 time = "*"
+log = "*"
