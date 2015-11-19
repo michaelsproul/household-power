@@ -2,6 +2,7 @@ extern crate xml;
 extern crate serial;
 extern crate time;
 #[macro_use] extern crate log;
+extern crate festivus_client;
 
 use std::path::Path;
 use std::io::Read;
@@ -18,6 +19,8 @@ use serial::posix::TTYPort;
 use serial::PortSettings;
 use serial::BaudRate::*;
 use time::Duration;
+
+use festivus_client::Festivus;
 
 use Parser::*;
 
@@ -181,10 +184,23 @@ fn main_with_result() -> Result<(), Error> {
             Tag("ch2", vec![Contents("watts", "off-peak-power")])
         ]);
 
+    let client = Festivus::new("http://localhost:3000");
+
     loop {
-        match run_parser(&mut event_reader, &parser) {
-            Ok(result) => println!("{:?}", result),
-            Err(_) => println!("(historical message - ignored)")
+        let data = match run_parser(&mut event_reader, &parser) {
+            Ok(x) => x,
+            Err(_) => {
+                println!("(historical message - ignored)");
+                continue;
+            }
+        };
+        println!("{:?}", data);
+
+        let peak = try!(data["peak-power"].parse());
+        let offpeak = try!(data["off-peak-power"].parse());
+
+        if let Err(e) = client.insert(peak, offpeak) {
+            println!("Error connecting to Festivus: {:?}", e);
         }
     }
 }

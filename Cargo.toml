@@ -9,3 +9,7 @@ xml-rs = "*"
 serial = "*"
 time = "*"
 log = "*"
+
+[dependencies.festivus_client]
+
+git = "https://github.com/michaelsproul/festivus_client.git"
