@@ -180,8 +180,9 @@ fn main_with_result() -> Result<(), Error> {
         Top("msg", vec![
             Contents("time", "time"),
             Contents("tmpr", "temperature"),
-            Tag("ch1", vec![Contents("watts", "peak-power")]),
-            Tag("ch2", vec![Contents("watts", "off-peak-power")])
+            Tag("ch1", vec![Contents("watts", "total")]),
+            Tag("ch2", vec![Contents("watts", "hotwater")]),
+            Tag("ch3", vec![Contents("watts", "solar")])
         ]);
 
     let client = Festivus::new("http://localhost:3000");
@@ -196,10 +197,11 @@ fn main_with_result() -> Result<(), Error> {
         };
         println!("{:?}", data);
 
-        let peak = try!(data["peak-power"].parse());
-        let offpeak = try!(data["off-peak-power"].parse());
+        let total = try!(data["total"].parse());
+        let hot_water = try!(data["hot_water"].parse());
+        let solar = try!(data["solar"].parse());
 
-        if let Err(e) = client.insert(peak, offpeak) {
+        if let Err(e) = client.insert(total, hot_water, solar) {
             println!("Error connecting to Festivus: {:?}", e);
         }
     }
