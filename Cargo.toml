@@ -7,7 +7,6 @@ authors = ["Michael Sproul <micsproul@gmail.com>"]
 
 xml-rs = "*"
 serial = "*"
-time = "*"
 log = "*"
 
 [dependencies.festivus_client]
