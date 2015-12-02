@@ -24,6 +24,8 @@ use festivus_client::Festivus;
 
 use Parser::*;
 
+const ONE_DAY: u64 = 60 * 60 * 24;
+
 /// Convert a String to a Box<Error>.
 fn string_error<T>(s: String) -> Result<T, Box<Error>> {
     let err: Box<Error + Send + Sync> = From::from(s);
@@ -83,13 +85,6 @@ impl<T> EventReaderExt for EventReader<T> where T: Read {
     }
 }
 
-fn is_start_tag(ev: &XmlEvent, tag_name: &str) -> bool {
-    match *ev {
-        StartElement { ref name, .. } => name_matches_str(name, tag_name),
-        _ => false
-    }
-}
-
 fn name_matches_str(name: &OwnedName, str_name: &str) -> bool {
     &name.local_name == str_name
 }
@@ -102,9 +97,18 @@ fn run_parser<T: Read>(src: &mut EventReader<T>, parser: &Parser)
 {
     match *parser {
         Top(tag, ref subparsers) => {
-            let xml_ev = try!(src.next_tag());
-            if !is_start_tag(&xml_ev, tag) {
-                return string_error(format!("Matching start tag not found for Top parser: {}", tag));
+            // Grab the start tag.
+            let start_tag = try!(src.next_tag());
+            match start_tag {
+                // If we have the correct start tag, all is well.
+                StartElement { ref name, .. } if name_matches_str(name, tag) => (),
+                // If we have another start tag, read to the end of it and bail.
+                StartElement { ref name, .. } => {
+                    src.read_to_tag_end(&name.local_name);
+                    return string_error(format!("Wrong start tag: {:?}", name));
+                }
+                // Anything else is bad.
+                e => return string_error(format!("Junk event: {:?}", e))
             }
 
             // Parse the inside and end of the tag.
@@ -163,7 +167,7 @@ fn init_serial() -> Result<TTYPort, Box<Error>> {
     };
     let mut port = try!(TTYPort::open(Path::new("/dev/ttyUSB0")));
     try!(port.configure(&settings));
-    try!(port.set_timeout(Duration::new(10 /* seconds */, 0)));
+    try!(port.set_timeout(Duration::new(ONE_DAY, 0)));
     Ok(port)
 }
 
@@ -186,8 +190,8 @@ fn main_with_result() -> Result<(), Box<Error>> {
     loop {
         let data = match run_parser(&mut event_reader, &parser) {
             Ok(x) => x,
-            Err(_) => {
-                println!("(historical message - ignored)");
+            Err(e) => {
+                println!("Parse error: {}", e);
                 continue;
             }
         };
